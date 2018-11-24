@@ -13,6 +13,11 @@ bin/
 gen/
 build/
 .gradle/
+target/
+.classpath
+.project
+.settings
+.filelist
 
 # Local configuration file (sdk path, etc)
 local.properties

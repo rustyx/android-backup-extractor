@@ -6,45 +6,24 @@ Largely based on ```BackupManagerService.java``` from AOSP.
 
 # Building
 
-Requires Java 7. Handling encrypted backups requires the JCE unlimited strength 
-jurisdiction policy (not needed if using current Java 9 release).
+Requires [Java 7](https://jdk.java.net/) or later (Oracle or OpenJDK).
 
-http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html
+Use the steps mentioned below to build or see [Releases](#releases) for pre-built binaries (runnable jar files).
 
-Use one of the tools listed below to build or see [Releases](#releases) for pre-built binaries (runnable jar files).
-
-## With Eclipse: 
-
-Download the latest version of Bouncy Castle Provider jar 
-(```bcprov-jdk15on-*.jar```) from [here](http://www.bouncycastle.org/latest_releases.html):
-
-Drop the latest Bouncy Castle jar in ```lib/```, import in Eclipse and adjust 
-build path if necessary. Use the ```abe``` script to start the utility. 
-
-## With Ant:
-
-Use the bundled Ant script to create an all-in-one jar and run with: 
-(you still need to put the Bouncy Castle jar in lib/; modify the 
-```bcprov.jar``` property accordingly)
-
-```java -jar abe.jar pack|unpack|pack-kk ...```
-
-(Thanks to Jan Peter Stotz for contributing the build.xml file)
-
-## With Gradle:
-
-Use gradle to create an all-in-one jar:
-```./gradlew``` and then:
-
-```java -jar build/libs/abe-all.jar pack|unpack|pack-kk ...```
+Use [Apache Maven](https://maven.apache.org/download.html) to create an all-in-one jar:
+```mvn package -Prelease```. The resulting binary will be at `target/abe.jar`.
 
 # Usage
+
+```java -jar target/abe.jar pack|unpack|pack-kk|x|c ...```
 
 ## Syntax: 
 * unpack:       ```abe unpack  <backup.ab> <backup.tar> [password]```
 * pack:         ```abe pack    <backup.tar> <backup.ab> [password]```
-* pack for 4.4: ```abe pack-kk <backup.tar> <backup.ab> [password]```
-  (creates version 2 backups, compatible with Android 4.4.3)
+* pack for 4.4+: ```abe pack-kk <backup.tar> <backup.ab> [password]```
+  (creates version 2 backups, to be used starting from Android 4.4.3)
+* extract tar:  ```abe x <backup.tar> <folder>```
+* create tar:   ```abe c <backup.tar> <folder>```
 
 If the filename is `-`, then data is read from standard input or written to
 standard output.
@@ -61,14 +40,18 @@ be encrypted but only compressed.
   - *(you can try restoring manually via `adb push` and `adb shell`)*
 - Errors are only printed to logcat, look out for `BackupManagerService`.
 
-The safest way to pack a tar archive is to get the list of files from the original backup.tar file:
+The safest way to pack a tar archive is to get the list of files from the original backup.tar file.
+The `x` and `c` commands write and read a file list in `.filelist`.
+
 ```shell
-tar tf backup.tar | grep -F "com.package.name" > package.list
+java -jar abe.jar x backup.tar .
 ```
-And then use that list to build the tar file. In the extracted backup directory:
+
+And build the new tar file:
 ```shell
-tar cf restore.tar -T package.list
+java -jar abe.jar c restore.tar .
 ```
+
 You can now pack `restore.tar` and try `adb restore restore.ab`
 
 # Releases
