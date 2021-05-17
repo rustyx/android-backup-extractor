@@ -1,12 +1,12 @@
 language: java
-script: gradle shadowJar
+script: mvn package -Prelease
 before_deploy:
     # Set up git user name and tag this commit
     - git config --local user.name "nelenkov"
     - git tag "$(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1)"
 deploy:
     provider: releases
-    file: build/libs/abe-all.jar
+    file: target/abe.jar
     api_key: "$GH_TOKEN"
     skip_cleanup: true
 
